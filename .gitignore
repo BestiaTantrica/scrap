@@ -1,0 +1,22 @@
+# Archivos de datos (no subir al repo)
+resultados_radar.json
+directorio_inmobiliarias.json
+*.xlsx
+*.csv
+*.log
+
+# Claves y tokens (NUNCA al repo público)
+.env
+*.pem
+*.key
+ssh-key*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
