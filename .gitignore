@@ -1,0 +1,20 @@
+# Entorno y Secretos
+.env
+__pycache__/
+*.pyc
+
+# Datos y Resultados
+resultados/
+reportes_generados/
+clientes_b2b/
+payments.json
+campaña_whatsapp.html
+
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# Sistema
+.DS_Store
+Thumbs.db

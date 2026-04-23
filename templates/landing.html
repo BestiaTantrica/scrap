@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Radar PropTech — Inteligencia Inmobiliaria Argentina</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e1a;--surface:#111827;--card:#1a2235;--accent:#38bdf8;--accent2:#818cf8;--green:#34d399;--red:#f87171;--text:#f1f5f9;--muted:#64748b;--border:#1e2d40}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 20px;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(56,189,248,0.12),transparent)}
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);border-radius:99px;padding:6px 16px;font-size:.75rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:24px}
+.badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1{font-size:clamp(2.2rem,6vw,4.5rem);font-weight:900;line-height:1.1;margin-bottom:20px;background:linear-gradient(135deg,#f1f5f9 0%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:1.15rem;color:var(--muted);max-width:580px;line-height:1.7;margin-bottom:40px}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.btn-primary{padding:14px 32px;background:var(--accent);color:#0a0e1a;font-weight:700;border-radius:10px;text-decoration:none;font-size:1rem;transition:.2s}
+.btn-primary:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.btn-secondary{padding:14px 32px;background:transparent;color:var(--text);font-weight:600;border-radius:10px;text-decoration:none;font-size:1rem;border:1px solid var(--border);transition:.2s}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+/* LIVE STATS */
+.live-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 0;overflow:hidden}
+.live-bar-inner{display:flex;gap:40px;animation:scroll 30s linear infinite;width:max-content}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.live-stat{display:flex;align-items:center;gap:10px;font-size:.85rem;white-space:nowrap}
+.live-stat .val{color:var(--accent);font-weight:700}
+
+/* SECTION */
+section{padding:80px 20px;max-width:1100px;margin:0 auto}
+.section-label{font-size:.75rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px}
+.section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;margin-bottom:16px}
+.section-sub{color:var(--muted);font-size:1.05rem;line-height:1.7;max-width:600px;margin-bottom:48px}
+
+/* ZONAS GRID */
+.zonas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.zona-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;transition:.2s;position:relative;overflow:hidden}
+.zona-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.zona-card:hover{border-color:var(--accent);transform:translateY(-4px)}
+.zona-name{font-size:1.3rem;font-weight:700;margin-bottom:8px}
+.zona-score-wrap{display:flex;align-items:center;justify-content:space-between;margin:16px 0}
+.zona-score-num{font-size:2.5rem;font-weight:900;color:var(--accent)}
+.zona-label{font-size:.8rem;color:var(--muted);text-align:right}
+.zona-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.zona-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:3px;transition:width 1s ease}
+.zona-props{font-size:.82rem;color:var(--muted);margin-top:12px}
+.zona-props span{color:var(--green);font-weight:600}
+.btn-zona{display:block;margin-top:16px;padding:10px;text-align:center;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.2);border-radius:8px;color:var(--accent);font-size:.85rem;font-weight:600;text-decoration:none;transition:.2s;cursor:pointer}
+.btn-zona:hover{background:var(--accent);color:#0a0e1a}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+.price-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;transition:.2s}
+.price-card.featured{border-color:var(--accent);background:linear-gradient(135deg,rgba(56,189,248,.08),var(--card))}
+.price-card:hover{transform:translateY(-4px)}
+.price-tag{font-size:2.2rem;font-weight:900;color:var(--text);margin:12px 0}
+.price-tag small{font-size:.9rem;color:var(--muted);font-weight:400}
+.price-label{font-size:.75rem;color:var(--accent);text-transform:uppercase;letter-spacing:.1em}
+.price-desc{color:var(--muted);font-size:.9rem;line-height:1.6;margin:12px 0 20px}
+.price-features{list-style:none;text-align:left;margin-bottom:24px}
+.price-features li{padding:6px 0;font-size:.88rem;color:var(--muted);display:flex;align-items:center;gap:8px}
+.price-features li::before{content:'✓';color:var(--green);font-weight:700}
+.btn-buy{display:block;padding:12px;background:var(--accent);color:#0a0e1a;font-weight:700;border-radius:8px;text-decoration:none;transition:.2s;border:none;cursor:pointer;width:100%;font-size:.95rem}
+.btn-buy:hover{filter:brightness(1.1)}
+.btn-buy.outline{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;max-width:480px;width:100%;position:relative}
+.modal h3{font-size:1.4rem;font-weight:700;margin-bottom:8px}
+.modal p{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:6px}
+.form-group input, .form-group select{width:100%;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.95rem;outline:none;transition:.2s;font-family:'Inter',sans-serif}
+.form-group input:focus, .form-group select:focus{border-color:var(--accent)}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer}
+
+/* HOW IT WORKS */
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px}
+.step{text-align:center;padding:24px}
+.step-num{width:48px;height:48px;border-radius:50%;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:1.1rem;font-weight:700;color:var(--accent)}
+.step h4{font-size:1.05rem;font-weight:700;margin-bottom:8px}
+.step p{color:var(--muted);font-size:.88rem;line-height:1.6}
+
+/* FOOTER */
+footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 20px;text-align:center}
+footer p{color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+
+<!-- LIVE BAR -->
+<div class="live-bar">
+  <div class="live-bar-inner" id="liveBar">
+    <div class="live-stat">SISTEMA ACTIVO <span class="val">24/7</span></div>
+    <div class="live-stat">Propiedades escaneadas hoy <span class="val" id="totalScanned">—</span></div>
+    <div class="live-stat">Zonas analizadas <span class="val" id="totalZonas">—</span></div>
+    <div class="live-stat">Oportunidades detectadas <span class="val">EN TIEMPO REAL</span></div>
+    <div class="live-stat">SISTEMA ACTIVO <span class="val">24/7</span></div>
+    <div class="live-stat">Propiedades escaneadas hoy <span class="val">+500</span></div>
+    <div class="live-stat">Zonas analizadas <span class="val">12</span></div>
+    <div class="live-stat">Oportunidades detectadas <span class="val">EN TIEMPO REAL</span></div>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge"><span class="dot"></span> Traficantes de Inteligencia de Mercado</div>
+  <h1>Encontramos a los dueños<br>que están liquidando</h1>
+  <p>Ni portales llenos de spam ni avisos viejos. Escaneamos 7 plataformas, detectamos dueños directos con urgencia de venta y te pasamos el contacto crudo para que lo captes o inviertas vos.</p>
+  <div class="hero-btns">
+    <a href="#zonas" class="btn-primary">Ver Zonas Calientes</a>
+    <a href="#precios" class="btn-secondary">Ver Planes</a>
+  </div>
+</div>
+
+<!-- ZONAS EN VIVO -->
+<section id="zonas">
+  <div class="section-label">Inteligencia en tiempo real</div>
+  <h2 class="section-title">Zonas Analizadas Hoy</h2>
+  <p class="section-sub">Cada zona tiene su propio Score de Inversión. El sistema las actualiza automáticamente. Pedí el reporte completo de cualquiera.</p>
+  <div class="zonas-grid" id="zonasGrid">
+    <!-- Se carga dinámicamente -->
+    <div class="zona-card" style="opacity:.4">
+      <div class="zona-name">Cargando zonas...</div>
+      <div class="zona-score-wrap"><span class="zona-score-num">—</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section style="background:var(--surface);max-width:100%;padding:80px 20px">
+<div style="max-width:1100px;margin:0 auto">
+  <div class="section-label">Simple y automático</div>
+  <h2 class="section-title">¿Cómo funciona?</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>El Radar Detecta</h4>
+      <p>Nuestros bots barren el mercado 24/7 buscando particulares que bajaron el precio o publicaron con urgencia.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>Filtramos la basura</h4>
+      <p>Descartamos inmobiliarias, publicaciones repetidas y estafas. Solo queda la data cruda y real.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>Pedís la zona</h4>
+      <p>Nos decís en qué barrio operás o querés invertir, y te mandamos un reporte preliminar (gratis).</p>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <h4>Destrabás los Links</h4>
+      <p>Pagás por la info y te damos los links directos a los dueños. Los llamás, los captás o les comprás. Fin.</p>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- PRECIOS -->
+<section id="precios">
+  <div class="section-label">Planes y precios</div>
+  <h2 class="section-title">Información que se paga sola</h2>
+  <p class="section-sub">Una sola oportunidad detectada a tiempo vale 100x el precio del reporte.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-label">Gancho</div>
+      <div class="price-tag">Gratis</div>
+      <div class="price-desc">Un paneo general. Te decimos cuántas urgencias hay, pero no quiénes son.</div>
+      <ul class="price-features">
+        <li>Temperatura de la zona (Score)</li>
+        <li>Cantidad de dueños directos</li>
+        <li>Precios promedio reales</li>
+      </ul>
+      <button class="btn-buy outline" onclick="openModal('gratis')">Ver Teaser (Sin cargo)</button>
+    </div>
+    <div class="price-card featured">
+      <div class="price-label">El Dato Crudo</div>
+      <div class="price-tag">$5.000 <small>ARS</small></div>
+      <div class="price-desc">El reporte completo de la zona que pidas. Pagás y te llevás los links hoy.</div>
+      <ul class="price-features">
+        <li>Links directos a los dueños</li>
+        <li>Score de urgencia 1-100</li>
+        <li>PDF listo para imprimir</li>
+      </ul>
+      <button class="btn-buy" onclick="openModal('full')">Comprar la Info</button>
+    </div>
+    <div class="price-card">
+      <div class="price-label">Socio Radar</div>
+      <div class="price-tag">$18.000 <small>ARS/mes</small></div>
+      <div class="price-desc">Para inmobiliarias e inversores pesados. Te avisamos ni bien alguien pisa el precio.</div>
+      <ul class="price-features">
+        <li>Alertas instantáneas a tu mail/WA</li>
+        <li>Zonas ilimitadas</li>
+        <li>Detección de estafas</li>
+      </ul>
+      <button class="btn-buy" onclick="openModal('pro')">Hacerme Pro</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>Radar PropTech — Sistema de Inteligencia Inmobiliaria Autónoma &nbsp;|&nbsp; <a href="/lab" style="color:var(--accent)">Panel Interno</a></p>
+</footer>
+
+<!-- MODAL DE COMPRA -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h3 id="modalTitle">Solicitar Reporte</h3>
+    <p id="modalDesc">Completá tus datos y el sistema te envía el reporte automáticamente.</p>
+    <div class="form-group">
+      <label>Tu email</label>
+      <input type="email" id="inputEmail" placeholder="ejemplo@mail.com">
+    </div>
+    <div class="form-group">
+      <label>Zona que te interesa</label>
+      <input type="text" id="inputZona" placeholder="Palermo, Luján, Belgrano...">
+    </div>
+    <div class="form-group" id="tipoGroup" style="display:none">
+      <label>Tipo de propiedad</label>
+      <select id="inputTipo">
+        <option>departamentos</option>
+        <option>casas</option>
+        <option>ph</option>
+      </select>
+    </div>
+    <button class="btn-buy" id="btnComprar" onclick="procesarCompra()">Enviar Solicitud</button>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:12px;text-align:center" id="modalNote">El Teaser es 100% gratis. Sin tarjeta de crédito.</p>
+  </div>
+</div>
+
+<script>
+let currentPlan = 'gratis';
+
+// Cargar zonas desde el sistema
+async function cargarZonas() {
+  try {
+    const res = await fetch('/api/zonas_calientes');
+    const zonas = await res.json();
+    const grid = document.getElementById('zonasGrid');
+    
+    if (!zonas.length) {
+      // Mostrar zonas de ejemplo mientras el sistema analiza
+      grid.innerHTML = generarZonasEjemplo();
+      return;
+    }
+    
+    grid.innerHTML = zonas.map(z => `
+      <div class="zona-card">
+        <div class="zona-name">${z.zona}</div>
+        <div class="zona-score-wrap">
+          <span class="zona-score-num">${z.score}</span>
+          <span class="zona-label">${z.label}<br><small style="font-size:.7rem">${z.total} propiedades</small></span>
+        </div>
+        <div class="zona-bar-bg"><div class="zona-bar-fill" style="width:${z.score}%"></div></div>
+        <div class="zona-props">Propiedades activas: <span>${z.total}</span></div>
+        <button class="btn-zona" onclick="openModal('full','${z.zona}')">Ver Reporte Completo →</button>
+      </div>
+    `).join('');
+    
+    document.getElementById('totalZonas').textContent = zonas.length;
+    document.getElementById('totalScanned').textContent = zonas.reduce((s,z)=>s+z.total,0) + '+';
+  } catch(e) {
+    document.getElementById('zonasGrid').innerHTML = generarZonasEjemplo();
+  }
+}
+
+function generarZonasEjemplo() {
+  const ejemplos = [
+    {zona:'Palermo', score:82, label:'Alta Demanda', total:193},
+    {zona:'Belgrano', score:74, label:'Zona Estable', total:145},
+    {zona:'Recoleta', score:91, label:'Mercado Activo', total:220},
+    {zona:'Luján', score:65, label:'Oportunidad', total:87},
+    {zona:'Pilar', score:78, label:'Crecimiento', total:112},
+    {zona:'San Isidro', score:86, label:'Alta Demanda', total:134},
+  ];
+  return ejemplos.map(z => `
+    <div class="zona-card">
+      <div class="zona-name">${z.zona}</div>
+      <div class="zona-score-wrap">
+        <span class="zona-score-num">${z.score}</span>
+        <span class="zona-label">${z.label}<br><small style="font-size:.7rem">${z.total} propiedades</small></span>
+      </div>
+      <div class="zona-bar-bg"><div class="zona-bar-fill" style="width:${z.score}%"></div></div>
+      <div class="zona-props">Propiedades activas: <span>${z.total}</span></div>
+      <button class="btn-zona" onclick="openModal('full','${z.zona}')">Ver Reporte Completo →</button>
+    </div>
+  `).join('');
+}
+
+function openModal(plan, zona='') {
+  currentPlan = plan;
+  const overlay = document.getElementById('modalOverlay');
+  const title = document.getElementById('modalTitle');
+  const desc = document.getElementById('modalDesc');
+  const note = document.getElementById('modalNote');
+  const btn = document.getElementById('btnComprar');
+  const tipoGroup = document.getElementById('tipoGroup');
+  
+  if(zona) document.getElementById('inputZona').value = zona;
+  
+  if(plan === 'gratis') {
+    title.textContent = 'Teaser Gratuito';
+    desc.textContent = 'Ingresá tu mail y zona. El sistema te manda el Zona Score y el resumen gratis.';
+    note.textContent = '100% gratis. Sin tarjeta. Sin spam.';
+    btn.textContent = 'Enviar Teaser Gratis';
+    tipoGroup.style.display = 'none';
+  } else if(plan === 'full') {
+    title.textContent = 'Reporte Full — $5.000 ARS';
+    desc.textContent = 'Links directos a dueños, análisis de m² y PDF profesional. Se entrega al instante después del pago.';
+    note.textContent = 'Pago único. Acceso por 24 horas.';
+    btn.textContent = 'Ir al Pago → $5.000 ARS';
+    tipoGroup.style.display = 'block';
+  } else {
+    title.textContent = 'Plan Pro — $18.000/mes';
+    desc.textContent = 'Zonas ilimitadas, alertas automáticas y detección de estafas. Todo incluido.';
+    note.textContent = 'Suscripción mensual. Cancelás cuando querés.';
+    btn.textContent = 'Activar Plan Pro';
+    tipoGroup.style.display = 'block';
+  }
+  
+  overlay.classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+async function procesarCompra() {
+  const email = document.getElementById('inputEmail').value;
+  const zona = document.getElementById('inputZona').value;
+  const tipo = document.getElementById('inputTipo').value;
+  
+  if(!email || !zona) { alert('Completá email y zona.'); return; }
+  
+  const btn = document.getElementById('btnComprar');
+  btn.textContent = 'Procesando...';
+  btn.disabled = true;
+  
+  if(currentPlan === 'gratis') {
+    // Disparar búsqueda en el servidor
+    await fetch('/api/buscar', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({zona: zona.toLowerCase(), tipo, max_paginas:1})
+    });
+    btn.textContent = 'Teaser enviado!';
+    setTimeout(closeModal, 2000);
+  } else {
+    // Redirigir a MercadoPago (en el futuro)
+    window.location.href = `/api/pago_exitoso/${email.replace('@','_')}?zona=${zona}&plan=${currentPlan}`;
+  }
+}
+
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href')).scrollIntoView({behavior:'smooth'});
+  });
+});
+
+// Init
+cargarZonas();
+setInterval(cargarZonas, 60000); // Auto-refresh cada minuto
+</script>
+</body>
+</html>
