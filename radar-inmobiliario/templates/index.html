@@ -103,7 +103,18 @@ td{padding:10px 14px;vertical-align:middle}
 
 <div class="container">
   <div class="grid">
-    <!-- Panel de control -->
+      <div class="card">
+        <h3>🔗 Acortador de URLs (Tu Algoritmo)</h3>
+        <p>Probá el motor Base62 que diseñamos. Pegá cualquier link largo.</p>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <input type="text" id="longUrl" placeholder="https://mercadopago.com/..." style="flex:1;padding:8px;background:#111;border:1px solid #333;color:white">
+          <button onclick="generarLinkCorto()" style="background:var(--accent);color:black;border:none;padding:8px 15px;font-weight:bold;cursor:pointer">ACORTAR</button>
+        </div>
+        <div id="shortResult" style="margin-top:15px;padding:10px;background:rgba(56,189,248,0.1);border-left:4px solid var(--accent);display:none">
+          <p style="font-size:0.8rem;color:var(--muted)">Link comprimido por el algoritmo:</p>
+          <a href="#" id="finalShortLink" target="_blank" style="color:var(--accent);font-weight:bold;text-decoration:none"></a>
+        </div>
+      </div>
     <div class="panel">
       <h2>🎯 Parámetros de Búsqueda</h2>
 
@@ -363,6 +374,24 @@ async function iniciarBusqueda() {
     btn.disabled = false; btn.textContent = '🔍 Iniciar Búsqueda Comparativa';
   };
 }
+async function generarLinkCorto() {
+  const url = document.getElementById('longUrl').value;
+  if(!url) return;
+  const res = await fetch('/api/shorten', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({url: url})
+  });
+  const data = await res.json();
+  if(data.short_url) {
+    const box = document.getElementById('shortResult');
+    const link = document.getElementById('finalShortLink');
+    box.style.display = 'block';
+    link.href = data.short_url;
+    link.textContent = data.short_url;
+  }
+}
 </script>
+
 </body>
 </html>

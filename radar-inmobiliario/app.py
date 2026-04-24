@@ -172,6 +172,11 @@ def acortador_interno(slug):
 # RUTAS API
 # ──────────────────────────────────────────────
 
+@app.route("/acortador")
+def shortener_page():
+    """Interfaz publica del acortador — Tu producto."""
+    return send_from_directory("templates", "shortener_app.html")
+
 @app.route("/")
 def landing():
     """Landing Page publica — El negocio."""
