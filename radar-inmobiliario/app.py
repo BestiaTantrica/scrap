@@ -150,6 +150,25 @@ def _run_scraper(job_id, plataformas, operacion, tipo, zona, max_paginas):
 
 
 # ──────────────────────────────────────────────
+# ACORTADOR DE URL PROPIO (LOW-FRICTION)
+# ──────────────────────────────────────────────
+REDIRECTS = {
+    "radar": "/",
+    "pago": "/api/generar_pago?zona=Palermo&tipo=departamento",
+    "oferta": "/#precios",
+    "panel": "/lab"
+}
+
+@app.route('/ir/<slug>')
+def acortador_interno(slug):
+    """Redirige slugs cortos a URLs largas."""
+    target = REDIRECTS.get(slug.lower())
+    if target:
+        return redirect(target)
+    return redirect("/")
+
+
+# ──────────────────────────────────────────────
 # RUTAS API
 # ──────────────────────────────────────────────
 
