@@ -123,7 +123,7 @@ def get_dias_publicado(link: str, fuente: str) -> dict:
         return {"dias": None, "error": str(e)}
 
 
-def _parsear_dias_texto(texto: str) -> int | None:
+def _parsear_dias_texto(texto: str):
     """Convierte texto de fecha relativa a cantidad de dias."""
     texto = texto.lower()
     if "hoy" in texto or "hace un momento" in texto:
@@ -143,7 +143,7 @@ def _parsear_dias_texto(texto: str) -> int | None:
     return None
 
 
-def score_urgencia_por_dias(dias: int | None) -> int:
+def score_urgencia_por_dias(dias):
     """Convierte dias publicado en score de urgencia (0-100)."""
     if dias is None:
         return 0
