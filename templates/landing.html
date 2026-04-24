@@ -353,8 +353,27 @@ async function procesarCompra() {
     btn.textContent = 'Teaser enviado!';
     setTimeout(closeModal, 2000);
   } else {
-    // Redirigir a MercadoPago (en el futuro)
-    window.location.href = `/api/pago_exitoso/${email.replace('@','_')}?zona=${zona}&plan=${currentPlan}`;
+    // Redirigir a MercadoPago Oficial
+    try {
+      const res = await fetch('/api/generar_pago', {
+        method:'POST', 
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email: email, zona: zona, plan: currentPlan})
+      });
+      const data = await res.json();
+      
+      if(data.init_point) {
+        window.location.href = data.init_point;
+      } else {
+        alert('Error: ' + (data.error || 'Configura el Token en el .env'));
+        btn.textContent = 'Error';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      alert('Error conectando con el servidor de pagos.');
+      btn.textContent = 'Error';
+      btn.disabled = false;
+    }
   }
 }
 

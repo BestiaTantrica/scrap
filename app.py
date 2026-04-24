@@ -13,7 +13,15 @@ import uuid
 from datetime import datetime, timedelta
 
 import pandas as pd
-from flask import Flask, Response, jsonify, request, send_from_directory
+from flask import Flask, Response, jsonify, request, send_from_directory, redirect
+import mercadopago
+from dotenv import load_dotenv
+
+# Cargar variables de entorno (Token MP)
+load_dotenv()
+
+# Inicializar MercadoPago
+sdk = mercadopago.SDK(os.environ.get("MP_ACCESS_TOKEN", ""))
 
 from scrapers import argenprop, properati, mercadolibre, remax, zonaprop, infocasas, lagraninmo
 import zona_intel
@@ -267,6 +275,50 @@ def descargar_csv(job_id):
         return jsonify({"error": "CSV no disponible"}), 404
     return send_file(job["csv"], as_attachment=True)
 
+
+@app.route("/api/generar_pago", methods=["POST"])
+def generar_pago():
+    """Genera un link de cobro real en MercadoPago."""
+    data = request.json
+    chat_id = data.get("email", "anonimo")
+    zona = data.get("zona", "general").upper()
+    plan = data.get("plan", "full")
+    
+    if not os.environ.get("MP_ACCESS_TOKEN"):
+        return jsonify({"error": "Falta configurar el Token de MP en el .env"}), 500
+
+    precio = 5000 if plan == "full" else 18000
+    titulo = f"Reporte Full Radar Pro - {zona}" if plan == "full" else "Suscripcion Socio Radar Pro"
+
+    base_url = request.host_url.rstrip('/')
+    
+    preference_data = {
+        "items": [
+            {
+                "title": titulo,
+                "quantity": 1,
+                "currency_id": "ARS",
+                "unit_price": precio
+            }
+        ],
+        "payer": {
+            "email": chat_id
+        },
+        "back_urls": {
+            "success": f"{base_url}/api/pago_exitoso/{chat_id}?zona={zona}",
+            "failure": f"{base_url}/",
+            "pending": f"{base_url}/"
+        },
+        "auto_return": "approved",
+    }
+
+    try:
+        preference_response = sdk.preference().create(preference_data)
+        preference = preference_response["response"]
+        return jsonify({"init_point": preference["init_point"]})
+    except Exception as e:
+        print(f"Error MP: {e}")
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/webhook/mp", methods=["POST"])
 def webhook_mp():
