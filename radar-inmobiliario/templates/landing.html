@@ -90,6 +90,12 @@ section{padding:80px 20px;max-width:1100px;margin:0 auto}
 /* FOOTER */
 footer{background:var(--surface);border-top:1px solid var(--border);padding:32px 20px;text-align:center}
 footer p{color:var(--muted);font-size:.85rem}
+.zona-loading{opacity:.4}
+.section-full{background:var(--surface);max-width:100%;padding:80px 20px}
+.section-inner{max-width:1100px;margin:0 auto}
+.footer-link{color:var(--accent)}
+.form-hidden{display:none}
+.modal-note{font-size:.78rem;color:var(--muted);margin-top:12px;text-align:center}
 </style>
 </head>
 <body>
@@ -126,7 +132,7 @@ footer p{color:var(--muted);font-size:.85rem}
   <p class="section-sub">Cada zona tiene su propio Score de Inversión. El sistema las actualiza automáticamente. Pedí el reporte completo de cualquiera.</p>
   <div class="zonas-grid" id="zonasGrid">
     <!-- Se carga dinámicamente -->
-    <div class="zona-card" style="opacity:.4">
+    <div class="zona-card zona-loading">
       <div class="zona-name">Cargando zonas...</div>
       <div class="zona-score-wrap"><span class="zona-score-num">—</span></div>
     </div>
@@ -134,8 +140,8 @@ footer p{color:var(--muted);font-size:.85rem}
 </section>
 
 <!-- CÓMO FUNCIONA -->
-<section style="background:var(--surface);max-width:100%;padding:80px 20px">
-<div style="max-width:1100px;margin:0 auto">
+<section class="section-full">
+<div class="section-inner">
   <div class="section-label">Simple y automático</div>
   <h2 class="section-title">¿Cómo funciona?</h2>
   <div class="steps">
@@ -207,7 +213,7 @@ footer p{color:var(--muted);font-size:.85rem}
 
 <!-- FOOTER -->
 <footer>
-  <p>Radar PropTech — Sistema de Inteligencia Inmobiliaria Autónoma &nbsp;|&nbsp; <a href="/lab" style="color:var(--accent)">Panel Interno</a></p>
+  <p>Radar PropTech — Sistema de Inteligencia Inmobiliaria Autónoma &nbsp;|&nbsp; <a href="/lab" class="footer-link">Panel Interno</a></p>
 </footer>
 
 <!-- MODAL DE COMPRA -->
@@ -224,7 +230,7 @@ footer p{color:var(--muted);font-size:.85rem}
       <label>Zona que te interesa</label>
       <input type="text" id="inputZona" placeholder="Palermo, Luján, Belgrano...">
     </div>
-    <div class="form-group" id="tipoGroup" style="display:none">
+    <div class="form-group form-hidden" id="tipoGroup">
       <label>Tipo de propiedad</label>
       <select id="inputTipo">
         <option>departamentos</option>
@@ -233,7 +239,7 @@ footer p{color:var(--muted);font-size:.85rem}
       </select>
     </div>
     <button class="btn-buy" id="btnComprar" onclick="procesarCompra()">Enviar Solicitud</button>
-    <p style="font-size:.78rem;color:var(--muted);margin-top:12px;text-align:center" id="modalNote">El Teaser es 100% gratis. Sin tarjeta de crédito.</p>
+    <p class="modal-note" id="modalNote">El Teaser es 100% gratis. Sin tarjeta de crédito.</p>
   </div>
 </div>
 
