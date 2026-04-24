@@ -150,23 +150,47 @@ def _run_scraper(job_id, plataformas, operacion, tipo, zona, max_paginas):
 
 
 # ──────────────────────────────────────────────
-# ACORTADOR DE URL PROPIO (LOW-FRICTION)
+# MOTOR DE ACORTADOR PROPIO (BASE62)
 # ──────────────────────────────────────────────
-REDIRECTS = {
-    "radar": "/",
-    "pago": "/api/generar_pago?zona=Palermo&tipo=departamento",
-    "oferta": "/#precios",
-    "panel": "/lab"
-}
+import shortener
+SHORT_LINKS_FILE = "short_links.json"
 
-@app.route('/ir/<slug>')
-def acortador_interno(slug):
-    """Redirige slugs cortos a URLs largas."""
-    target = REDIRECTS.get(slug.lower())
+def get_links():
+    if not os.path.exists(SHORT_LINKS_FILE): return {}
+    with open(SHORT_LINKS_FILE, "r") as f: return json.load(f)
+
+def save_links(links):
+    with open(SHORT_LINKS_FILE, "w") as f: json.dump(links, f)
+
+@app.route('/s/<slug>')
+def redirect_short(slug):
+    """Redirige usando el motor Base62."""
+    links = get_links()
+    target = links.get(slug)
     if target:
         return redirect(target)
     return redirect("/")
 
+@app.route('/api/shorten', methods=["POST"])
+def api_shorten():
+    """Endpoint para crear links cortos (Tu futuro negocio)."""
+    data = request.json
+    long_url = data.get("url")
+    if not long_url: return jsonify({"error": "Falta URL"}), 400
+    
+    links = get_links()
+    new_id = len(links) + 1000 
+    slug = shortener.encode(new_id)
+    
+    links[slug] = long_url
+    save_links(links)
+    
+    base_url = request.host_url.rstrip('/')
+    return jsonify({
+        "slug": slug,
+        "short_url": f"{base_url}/s/{slug}",
+        "long_url": long_url
+    })
 
 # ──────────────────────────────────────────────
 # RUTAS API
