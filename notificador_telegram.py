@@ -16,7 +16,7 @@ load_dotenv()
 
 # ─── CONFIGURACIÓN (llenar con tus datos) ───────────────────
 # Para crear un bot: habla con @BotFather en Telegram
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TELEGRAM_BOT_TOKEN = os.environ.get("RADAR_BOT_TOKEN")
 # Tu chat_id personal (o el del cliente): usa @userinfobot para obtenerlo
 TELEGRAM_CHAT_ID   = os.environ.get("TELEGRAM_CHAT_ID",   "6527908321")
 
@@ -90,5 +90,12 @@ def enviar_reporte(json_file: str = "resultados_radar.json"):
 
     print(f"Reporte enviado a Telegram: {len(top)} propiedades.")
 
+import sys
+
 if __name__ == "__main__":
-    enviar_reporte()
+    if len(sys.argv) > 1:
+        archivo = sys.argv[1]
+        enviar_reporte(archivo)
+    else:
+        # Por defecto intenta buscar en la raíz (legacy fallback)
+        enviar_reporte()

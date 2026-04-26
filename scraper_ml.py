@@ -1,163 +1,94 @@
-"""
-=============================================================
-  SCRAPER MERCADOLIBRE INMUEBLES v1.0
-  Fuente: ML Argentina — Propiedades sin portal profesional
-  Stack: curl-cffi + BeautifulSoup (RAM-safe)
-=============================================================
-"""
-
+import json
 from curl_cffi import requests
 from bs4 import BeautifulSoup
-import json
 import time
-import random
-from datetime import datetime
 
-# ─── CONFIGURACIÓN ───────────────────────────────────────────
-CONFIG_ML = {
-    # Mismas zonas que Zonaprop para poder cruzar datos
-    "zonas": ["palermo", "belgrano", "caballito", "villa-del-parque", "almagro"],
-    "max_paginas": 3,
-    "delay_min": 3.0,
-    "delay_max": 7.0,
-    "output_json": "resultados_ml.json",
-    "palabras_urgencia": [
-        "urgente", "urge", "dueno vende", "particular",
-        "sin comision", "oportunidad", "negociable",
-        "acepto oferta", "permuta", "por viaje",
-    ],
-}
-
-def calcular_score_urgencia(texto: str) -> dict:
-    texto_lower = texto.lower()
-    encontradas = [p for p in CONFIG_ML["palabras_urgencia"] if p in texto_lower]
-    score = min(100, len(encontradas) * 30)
-    if "particular" in texto_lower or "dueno" in texto_lower:
-        score = min(100, score + 35)
-    return {
-        "score": score,
-        "senales": ", ".join(encontradas),
-        "etiqueta": "URGENTE" if score >= 60 else ("INTERESANTE" if score >= 30 else "NORMAL")
+def parse_ml():
+    url = "https://inmuebles.mercadolibre.com.ar/departamentos/venta/capital-federal/dueno-directo/"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
-def scrape_ml_zona(zona: str, pagina: int):
-    """Extrae propiedades de ML Capital Federal por zona y página."""
-    offset = (pagina - 1) * 48
-    # URL correcta para ML Capital Federal por barrio
-    if pagina == 1:
-        url = f"https://inmuebles.mercadolibre.com.ar/inmuebles/venta/capital-federal/{zona}/"
-    else:
-        url = f"https://inmuebles.mercadolibre.com.ar/inmuebles/venta/capital-federal/{zona}/_Desde_{offset + 1}_NoIndex_True"
-    
-    print(f"  -> ML Infiltrando: {zona} (pag {pagina})")
+    print(f"🔍 Scrapeando MercadoLibre (Modo Ultra-Rápido)...")
     
     try:
-        response = requests.get(url, impersonate="chrome120", timeout=30)
-        
-        if response.status_code == 200:
-            return parsear_ml(response.text, zona)
-        else:
-            print(f"  [X] Error {response.status_code}")
+        # Usamos curl-cffi para saltar protecciones imitando a Chrome
+        response = requests.get(url, headers=headers, impersonate="chrome110")
+        if response.status_code != 200:
+            print(f"❌ Error: Status {response.status_code}")
             return []
+            
+        soup = BeautifulSoup(response.text, 'html.parser')
+        items = soup.select('.poly-card')
+        
+        resultados = []
+        for item in items[:40]:  # Tomamos los primeros 40
+            try:
+                # Titulo y link
+                a_tag = item.select_one('.poly-component__title-wrapper a')
+                if not a_tag: continue
+                titulo = a_tag.text.strip()
+                link = a_tag.get('href', '')
+                
+                # Precio y moneda
+                precio_tag = item.select_one('.poly-price__current .andes-money-amount__fraction')
+                moneda_tag = item.select_one('.poly-price__current .andes-money-amount__currency-symbol')
+                
+                precio = precio_tag.text.strip() if precio_tag else "Consultar"
+                moneda = moneda_tag.text.strip() if moneda_tag else ""
+                
+                # Ubicacion
+                ubicacion_tag = item.select_one('.poly-component__location')
+                ubicacion = ubicacion_tag.text.strip() if ubicacion_tag else "CABA"
+                
+                # Scoring de urgencia básico para el demo
+                score = 50
+                tags = []
+                if "oportunidad" in titulo.lower() or "urge" in titulo.lower():
+                    score += 30
+                    tags.append("oportunidad")
+                if "dueño" in titulo.lower() or "directo" in titulo.lower():
+                    score += 20
+                    tags.append("dueño directo")
+                
+                resultados.append({
+                    "titulo": titulo,
+                    "precio": f"{moneda} {precio}",
+                    "link": link,
+                    "score_urgencia": score,
+                    "señales": ", ".join(tags) if tags else "normal",
+                    "zona": ubicacion,
+                    "etiqueta": "🔥 URGENTE" if score >= 70 else "⚖️ INTERESANTE"
+                })
+            except Exception as e:
+                print("Error en item:", e)
+                continue
+                
+        return resultados
+        
     except Exception as e:
-        print(f"  [X] Error conexion: {str(e)[:50]}")
+        print(f"❌ Error fatal en scraper: {str(e)}")
         return []
 
-def parsear_ml(html: str, zona: str) -> list:
-    soup = BeautifulSoup(html, "html.parser")
-    propiedades = []
-    
-    # Selectores ML (múltiples fallbacks por si cambian)
-    cards = (
-        soup.select('li.ui-search-layout__item') or
-        soup.select('div.ui-search-result') or
-        soup.select('li[class*="result"]') or
-        soup.select('div[class*="Result"]')
-    )
-    
-    for card in cards:
-            try:
-                texto_completo = card.get_text(" ", strip=True)
-                
-                # Titulo (nuevo selector poly-card de ML 2024)
-                titulo_tag = card.select_one('a.poly-component__title')
-                titulo = titulo_tag.get_text(strip=True) if titulo_tag else texto_completo[:100]
-                
-                # Link (limpiar tracking)
-                link = titulo_tag["href"].split("#")[0] if titulo_tag and titulo_tag.get("href") else ""
-                
-                # Precio
-                moneda_tag = card.select_one('span.andes-money-amount__currency-symbol')
-                fraccion_tag = card.select_one('span.andes-money-amount__fraction')
-                if fraccion_tag:
-                    moneda = moneda_tag.get_text(strip=True) if moneda_tag else ""
-                    precio = f"{moneda} {fraccion_tag.get_text(strip=True)}"
-                else:
-                    precio = "Consultar"
-                
-                # Vendedor: si tiene nombre es inmobiliaria, si no es particular
-                seller_tag = card.select_one('span.poly-component__seller')
-                vendedor = seller_tag.get_text(strip=True) if seller_tag else "Particular"
-                es_inmobiliaria = bool(seller_tag)
-                
-                urgencia = calcular_score_urgencia(titulo + " " + texto_completo)
-                
-                # Solo guardar si tiene link válido
-                if not link: continue
-                
-                propiedades.append({
-                    "id": f"ml_{abs(hash(link)) % 10000000}",
-                    "fuente": "MercadoLibre",
-                    "zona": zona.title(),
-                    "titulo": titulo[:150],
-                    "precio": precio,
-                    "direccion": zona.title(),
-                    "vendedor": vendedor,
-                    "es_inmobiliaria": es_inmobiliaria,
-                    "score_urgencia": urgencia["score"],
-                    "etiqueta": urgencia["etiqueta"],
-                    "senales": urgencia["senales"],
-                    "link": link,
-                    "fecha": datetime.now().strftime("%Y-%m-%d")
-                })
-            except:
-                continue
-    return propiedades
-
-
-def run(zona_arg=None):
-    import sys
-    zonas = [zona_arg] if zona_arg else (
-        [sys.argv[1]] if len(sys.argv) > 1 else CONFIG_ML["zonas"]
-    )
-    
-    print("\n" + "="*55)
-    print("    RADAR ML INMUEBLES v1.0")
-    print("="*55 + "\n")
-
-    todas = []
-    ids = set()
-    
-    for zona in zonas:
-        print(f"[+] Zona ML: {zona}")
-        for pagina in range(1, CONFIG_ML["max_paginas"] + 1):
-            resultado = scrape_ml_zona(zona, pagina)
-            if not resultado:
-                break
-            for p in resultado:
-                if p["id"] not in ids:
-                    ids.add(p["id"])
-                    todas.append(p)
-            time.sleep(random.uniform(CONFIG_ML["delay_min"], CONFIG_ML["delay_max"]))
-        time.sleep(random.uniform(8, 15))
-    
-    if todas:
-        todas.sort(key=lambda x: x["score_urgencia"], reverse=True)
-        with open(CONFIG_ML["output_json"], "w", encoding="utf-8") as f:
-            json.dump(todas, f, ensure_ascii=False, indent=2)
-        print(f"\n[OK] ML listo. {len(todas)} propiedades capturadas.")
-    else:
-        print("\n[!] Sin resultados. Verificar zona o conexion.")
-
 if __name__ == "__main__":
-    run()
+    import datetime
+    import os
+    from pathlib import Path
+    
+    zona_str = "CABA"
+    results = parse_ml()
+    
+    # --- ARQUITECTURA DATA LAKE ---
+    # Ruta relativa al directorio del script (funciona en WSL2 y Oracle Cloud)
+    BASE_DIR = Path(__file__).parent.resolve()
+    hoy = datetime.datetime.now()
+    ruta_base = BASE_DIR / "base_datos" / hoy.strftime('%Y/%m/%d') / zona_str
+    os.makedirs(ruta_base, exist_ok=True)
+    
+    archivo_salida = ruta_base / "mercadolibre.json"
+    
+    with open(archivo_salida, "w", encoding="utf-8") as f:
+        json.dump(results, f, ensure_ascii=False, indent=4)
+        
+    print(f"✅ Se guardaron {len(results)} propiedades en {archivo_salida}")

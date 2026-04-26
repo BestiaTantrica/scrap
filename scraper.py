@@ -162,9 +162,18 @@ def run():
 
     if todas:
         todas.sort(key=lambda x: x["score_urgencia"], reverse=True)
-        with open(CONFIG["output_json"], "w", encoding="utf-8") as f:
+        # --- ARQUITECTURA DATA LAKE ---
+        hoy = datetime.now()
+        # Si se escaneó una zona específica, la usamos, sino "MIX"
+        zona_str = zonas_a_escanear[0].upper() if len(zonas_a_escanear) == 1 else "MIX"
+        ruta_base = f"base_datos/{hoy.strftime('%Y/%m/%d')}/{zona_str}"
+        os.makedirs(ruta_base, exist_ok=True)
+        
+        archivo_salida = f"{ruta_base}/zonaprop.json"
+        with open(archivo_salida, "w", encoding="utf-8") as f:
             json.dump(todas, f, ensure_ascii=False, indent=2)
-        print(f"\n[OK] Éxito. {len(todas)} propiedades filtradas.")
+            
+        print(f"\n[OK] Éxito. {len(todas)} propiedades guardadas en {archivo_salida}.")
     else:
         print("\n[!] No se capturaron datos.")
 

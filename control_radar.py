@@ -1,7 +1,9 @@
 """
 =============================================================
-  CENTRO DE MANDO RADAR — MIGRACION_SCRAPING_CASH
-  Escucha órdenes de Telegram y lanza los Scrapers (Con Botones)
+  BOT ÚNICO v3.0: CENTRO DE MANDO + MODO AUTOMÁTICO
+  - Botones para disparar scrapers manualmente
+  - Modo AUTO: scrapea cada 6hs y manda resultados solo
+  - Funciona en WSL2 y Oracle Cloud sin cambios
 =============================================================
 """
 
@@ -9,80 +11,148 @@ import telebot
 from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 import subprocess
 import os
+import json
+import threading
+import time
+import datetime
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+# Directorio base = carpeta donde está este script
+BASE_DIR = Path(__file__).parent.resolve()
+load_dotenv(dotenv_path=BASE_DIR / ".env")
 
-TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
+TOKEN   = os.environ.get("RADAR_BOT_TOKEN")
 USER_ID = int(os.environ.get("TELEGRAM_CHAT_ID", "6527908321"))
 
 if not TOKEN:
-    print("[!] ERROR: No se encontró TELEGRAM_BOT_TOKEN en .env")
+    print("[!] ERROR: No se encontró RADAR_BOT_TOKEN en .env")
     exit(1)
 
 bot = telebot.TeleBot(TOKEN)
 
-# Generar Teclado Principal (Botones Interactivos)
+# Estado del modo automático
+auto_activo = {"valor": False}
+
+# ─── MENÚ ────────────────────────────────────────────────────
 def menu_principal():
     markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    btn_status = KeyboardButton("📊 Estado del Sistema")
-    btn_zp = KeyboardButton("🕸️ Escanear Zonaprop (CABA)")
-    btn_ml = KeyboardButton("🕸️ Escanear MercadoLibre (CABA)")
-    btn_zp_lujan = KeyboardButton("🎯 Escanear Zonaprop: Lujan")
-    markup.add(btn_zp, btn_ml, btn_zp_lujan, btn_status)
+    markup.add(
+        KeyboardButton("🕸️ Zonaprop CABA"),
+        KeyboardButton("🕸️ MercadoLibre CABA"),
+        KeyboardButton("🤖 AUTO: Activar" if not auto_activo["valor"] else "🛑 AUTO: Detener"),
+        KeyboardButton("📊 Estado Servidor"),
+    )
     return markup
 
+# ─── LÓGICA DE SCRAPING ──────────────────────────────────────
+def worker_scraper(cmd, nombre, silencioso=False):
+    """Ejecuta el scraper y luego el notificador. silencioso=True para el modo auto."""
+    try:
+        if not silencioso:
+            print(f"[RUN] Ejecutando Scraper: {nombre}")
+        
+        subprocess.run(f"python3 {cmd}", shell=True, check=True, cwd=str(BASE_DIR))
+        
+        # Buscar el archivo generado (MIX primero, luego CABA)
+        hoy = datetime.datetime.now().strftime('%Y/%m/%d')
+        proveedor = "mercadolibre.json" if "ml" in cmd.lower() else "zonaprop.json"
+        
+        ruta = f"base_datos/{hoy}/MIX/{proveedor}"
+        if not (BASE_DIR / ruta).exists():
+            ruta = f"base_datos/{hoy}/CABA/{proveedor}"
+
+        subprocess.run(
+            f"python3 notificador_telegram.py {ruta}",
+            shell=True, check=True, cwd=str(BASE_DIR)
+        )
+        print(f"[OK] Notificación enviada: {ruta}")
+
+    except Exception as e:
+        bot.send_message(USER_ID, f"❌ *Error en {nombre}:*\n`{str(e)}`", parse_mode="Markdown")
+
+def run_scraper(nombre, cmd):
+    bot.send_message(USER_ID,
+        f"🔍 *Iniciando Radar:* `{nombre}`...\nTe aviso cuando termine.",
+        parse_mode="Markdown", reply_markup=menu_principal()
+    )
+    t = threading.Thread(target=worker_scraper, args=(cmd, nombre))
+    t.daemon = True
+    t.start()
+
+# ─── MODO AUTOMÁTICO ─────────────────────────────────────────
+def ciclo_automatico():
+    """Corre scrapers cada 6 horas mientras auto_activo sea True."""
+    while auto_activo["valor"]:
+        ahora = datetime.datetime.now().strftime("%H:%M")
+        bot.send_message(USER_ID,
+            f"🤖 *MODO AUTO* — Ciclo iniciado a las {ahora}\nEscaneando ZonaProp y MercadoLibre...",
+            parse_mode="Markdown"
+        )
+        worker_scraper("scraper.py", "Zonaprop AUTO", silencioso=True)
+        time.sleep(30)  # Pausa entre scrapers para no sobrecargar
+        worker_scraper("scraper_ml.py", "MercadoLibre AUTO", silencioso=True)
+        
+        # Esperar 6 horas (21600 segundos), pero chequeando si se desactivó
+        for _ in range(360):  # 360 x 60s = 6hs
+            if not auto_activo["valor"]:
+                break
+            time.sleep(60)
+
+# ─── HANDLERS DE TELEGRAM ────────────────────────────────────
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    if message.from_user.id != USER_ID: return
-    help_text = (
-        "🚀 *CENTRO DE MANDO RADAR*\n\n"
-        "Seleccione una acción del menú inferior o use los comandos clásicos:\n"
-        "🔹 `/radar <zona>` - Busca en Zonaprop (ej: /radar lujan)\n"
-        "🔹 `/ml <zona>` - Busca en MercadoLibre (ej: /ml lujan)\n"
+    estado_auto = "🟢 ACTIVO" if auto_activo["valor"] else "🔴 INACTIVO"
+    text = (
+        f"👑 *CENTRO DE MANDO — RADAR INMOBILIARIO*\n\n"
+        f"🤖 Modo Automático: {estado_auto}\n\n"
+        f"Usá los botones de abajo para controlar el sistema."
     )
-    bot.reply_to(message, help_text, parse_mode="Markdown", reply_markup=menu_principal())
+    bot.reply_to(message, text, parse_mode="Markdown", reply_markup=menu_principal())
 
 @bot.message_handler(func=lambda message: True)
 def handle_text(message):
-    if message.from_user.id != USER_ID: return
     text = message.text
 
-    if text == "📊 Estado del Sistema":
+    if text == "🕸️ Zonaprop CABA":
+        run_scraper("Zonaprop CABA", "scraper.py")
+
+    elif text == "🕸️ MercadoLibre CABA":
+        run_scraper("MercadoLibre CABA", "scraper_ml.py")
+
+    elif text == "📊 Estado Servidor":
         try:
-            res = subprocess.check_output("free -h", shell=True).decode()
-            bot.reply_to(message, f"📊 *Estado del Servidor:*\n```\n{res}\n```", parse_mode="Markdown")
-        except:
-            bot.reply_to(message, "Estado local.")
-            
-    elif text == "🕸️ Escanear Zonaprop (CABA)":
-        run_scraper(message, "scraper.py", "Zonaprop CABA")
-        
-    elif text == "🕸️ Escanear MercadoLibre (CABA)":
-        run_scraper(message, "scraper_ml.py", "MercadoLibre CABA")
-        
-    elif text == "🎯 Escanear Zonaprop: Lujan":
-        run_scraper(message, "scraper.py lujan", "Zonaprop Lujan")
-        
-    elif text.startswith("/radar "):
-        zona = text.replace("/radar ", "").strip()
-        run_scraper(message, f"scraper.py {zona}", f"Zonaprop {zona}")
-        
-    elif text.startswith("/ml "):
-        zona = text.replace("/ml ", "").strip()
-        run_scraper(message, f"scraper_ml.py {zona}", f"ML {zona}")
+            ram = subprocess.check_output("free -h", shell=True).decode()
+            estado_auto = "🟢 ACTIVO" if auto_activo["valor"] else "🔴 INACTIVO"
+            bot.reply_to(message,
+                f"📊 *Estado RAM:*\n```\n{ram}\n```\n🤖 *Modo Auto:* {estado_auto}",
+                parse_mode="Markdown"
+            )
+        except Exception as e:
+            bot.reply_to(message, f"❌ Error: {e}")
 
-def run_scraper(message, cmd, nombre):
-    msg_init = f"🔍 *Iniciando Radar en:* `{nombre}`\nEsto tomará unos minutos... ☕"
-    bot.send_message(USER_ID, msg_init, parse_mode="Markdown", reply_markup=menu_principal())
-    
-    try:
-        subprocess.run(f"python3 {cmd}", shell=True, check=True)
-        # Una vez terminado, lanzamos el notificador que lee los JSON y envía los leads
-        subprocess.run("python3 notificador_telegram.py", shell=True, check=True)
-        bot.send_message(USER_ID, f"✅ *Radar {nombre} completado.* Resultados enviados arriba. 👆")
-    except Exception as e:
-        bot.send_message(USER_ID, f"❌ *Error en Radar {nombre}:* \n`{str(e)}`", parse_mode="Markdown")
+    elif "AUTO: Activar" in text:
+        if not auto_activo["valor"]:
+            auto_activo["valor"] = True
+            bot.reply_to(message,
+                "🤖 *Modo Automático ACTIVADO*\n"
+                "Voy a scrapear ZonaProp + MercadoLibre cada 6 horas y mandarte los resultados acá.",
+                parse_mode="Markdown", reply_markup=menu_principal()
+            )
+            t = threading.Thread(target=ciclo_automatico)
+            t.daemon = True
+            t.start()
+        else:
+            bot.reply_to(message, "⚠️ El modo automático ya está activo.")
 
-print("[OK] Centro de Mando Radar Iniciado. Esperando órdenes en Telegram...")
+    elif "AUTO: Detener" in text:
+        auto_activo["valor"] = False
+        bot.reply_to(message,
+            "🛑 *Modo Automático DETENIDO*\nEl bot ya no escaneará automáticamente.",
+            parse_mode="Markdown", reply_markup=menu_principal()
+        )
+
+print("[OK] Centro de Mando v3.0 listo — Modo Auto disponible")
+print(f"[OK] Chat ID configurado: {USER_ID}")
 bot.infinity_polling()
+
