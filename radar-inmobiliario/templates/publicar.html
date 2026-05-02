@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBLICAR PRO | RADAR ALPHA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #050508; --accent: #00f2ff; --text: #fff; --card: #111; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: var(--card); padding: 30px; border-radius: 20px; border: 1px solid #333; }
+        h1 { color: var(--accent); margin-bottom: 20px; font-weight: 900; text-align: center; }
+        .drop-zone { border: 2px dashed #444; padding: 40px; text-align: center; border-radius: 15px; margin: 20px 0; cursor: pointer; transition: 0.3s; }
+        .drop-zone:hover { border-color: var(--accent); background: rgba(0,242,255,0.05); }
+        input, textarea, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #000; color: #fff; margin-bottom: 15px; }
+        button { background: var(--accent); color: #000; padding: 18px; border-radius: 12px; font-weight: 900; border: none; width: 100%; cursor: pointer; font-size: 1.1rem; }
+        #preview { display: none; margin-top: 30px; border-top: 1px solid #333; padding-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Publicación Pro</h1>
+        <form id="pub-form">
+            <label>Operación</label>
+            <select name="operacion" required>
+                <option value="VENTA">Venta</option>
+                <option value="ALQUILER">Alquiler Tradicional</option>
+                <option value="ALQUILER TEMPORAL">Alquiler Temporal</option>
+            </select>
+            <label>Zona / Barrio</label>
+            <input type="text" name="zona" placeholder="Ej: Palermo Soho" required>
+            <label>Precio (US$)</label>
+            <input type="text" name="precio" placeholder="Ej: 125.000" required>
+            <label>Descripción</label>
+            <textarea name="detalles" rows="4" placeholder="Contanos de la propiedad..."></textarea>
+            
+            <div class="drop-zone" onclick="document.getElementById('file-input').click()">
+                <div style="font-size: 2rem;">📸</div>
+                <p id="drop-text">Hacé clic para subir tus fotos</p>
+                <input type="file" name="fotos" id="file-input" multiple style="display:none;" onchange="document.getElementById('drop-text').innerText = this.files.length + ' foto(s) seleccionada(s) para Análisis IA'">
+            </div>
+
+            <button type="button" id="submit-btn" onclick="generarPieza()">GENERAR POST AHORA</button>
+        </form>
+
+        <div id="preview">
+            <h2 style="color:var(--accent); margin-bottom:15px;">✨ Tu Pieza Pro:</h2>
+            <div id="visual-html"></div>
+            <textarea id="copy-text" rows="6" style="margin-top:20px; font-family:monospace; font-size: 0.9rem;"></textarea>
+            <p style="font-size:0.8rem; margin-top:10px; opacity:0.6;">Copiá el texto y usá el diseño para tus redes.</p>
+        </div>
+    </div>
+
+    <script>
+        async function generarPieza() {
+            const btn = document.getElementById('submit-btn');
+            btn.innerText = "GENERANDO...";
+            const form = document.getElementById('pub-form');
+            const formData = new FormData(form);
+            
+            try {
+                const res = await fetch('/publicar', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if(data.status === 'success') {
+                    document.getElementById('preview').style.display = 'block';
+                    document.getElementById('visual-html').innerHTML = data.pieza.html_preview;
+                    document.getElementById('copy-text').value = data.pieza.copy;
+                    window.scrollTo(0, document.body.scrollHeight);
+                } else {
+                    alert("Hubo un problema. Revisá los datos.");
+                }
+            } catch(e) {
+                alert("Error de conexión. Intentá de nuevo.");
+            } finally {
+                btn.innerText = "GENERAR POST AHORA";
+            }
+        }
+    </script>
+</body>
+</html>

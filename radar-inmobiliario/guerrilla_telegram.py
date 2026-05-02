@@ -19,12 +19,15 @@ if _env_path.exists():
             k, v = line.split("=", 1)
             os.environ.setdefault(k.strip(), v.strip())
 
-BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+# CONFIGURACIÓN DE GUERRILLA
+BOT_TOKEN = "8663210496:AAGV0JhVpeW87cdkpwKEBtyXznuRqfONOu4"
 
-# Lista de IDs de grupos/canales donde el bot es administrador o miembro
-# Por ahora ponemos un chat de prueba (tu propio chat ID)
+# Lista de Grupos Objetivo (Amplitud de Mercado)
 GRUPOS_OBJETIVO = [
-    os.environ.get("TELEGRAM_CHAT_ID", "")
+    6527908321,   # Tu Chat Principal
+    "-1001234567890", # Ejemplo: Grupo Inversores CABA
+    "-1000987654321", # Ejemplo: Grupo Remates Judiciales
+    "-1001122334455"  # Ejemplo: Grupo Brokers Pro
 ]
 
 def obtener_ultima_data():

@@ -3,380 +3,473 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Comparador Inmobiliario AR</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<title>RADAR INMOBILIARIO — Intelligence Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0a0a14;--surface:#12122a;--card:#1a1a35;--border:#2a2a55;
-  --accent:#00d4ff;--accent2:#7c3aed;--green:#22c55e;--orange:#f97316;--yellow:#ffe000;
-  --text:#e2e8f0;--muted:#64748b;
+:root {
+    --bg: #050508;
+    --surface: #0c0c14;
+    --panel: rgba(18, 18, 35, 0.7);
+    --border: rgba(255, 255, 255, 0.1);
+    --accent: #00f2ff;
+    --accent-glow: rgba(0, 242, 255, 0.3);
+    --gold: #ffcc00;
+    --fire: #ff4d00;
+    --green: #00ff88;
+    --text: #e0e0f0;
+    --text-dim: #8888aa;
 }
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.header{background:linear-gradient(135deg,var(--surface),var(--card));border-bottom:1px solid var(--border);padding:20px 32px;display:flex;align-items:center;gap:16px}
-.header h1{font-size:1.5rem;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.header .subtitle{color:var(--muted);font-size:.85rem;margin-top:2px}
-.pulse{width:10px;height:10px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
-.container{max-width:1400px;margin:0 auto;padding:24px 32px}
-.grid{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
-.panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px}
-.panel h2{font-size:1rem;font-weight:600;color:var(--accent);margin-bottom:20px;text-transform:uppercase;letter-spacing:.05em}
-label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:6px;margin-top:16px}
-label:first-of-type{margin-top:0}
-input,select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:10px;font-size:.9rem;outline:none;transition:.2s}
-input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,212,255,.1)}
-.platforms{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
-.plat-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface);border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:.2s;font-size:.82rem;font-weight:600}
-.plat-btn.active{border-color:var(--accent);background:rgba(0,212,255,.08);color:var(--accent)}
-/* Membership Section */
-.membership-card{background:linear-gradient(135deg, rgba(124,58,237,0.2), rgba(0,212,255,0.1));border:1px solid var(--accent2);border-radius:12px;padding:16px;margin-top:20px;text-align:center}
-.membership-card h3{font-size:.9rem;color:var(--accent2);margin-bottom:8px;text-transform:uppercase}
-.membership-card p{font-size:.75rem;color:var(--muted);margin-bottom:12px}
-.btn-upgrade{display:block;width:100%;padding:10px;background:var(--accent2);color:#fff;text-decoration:none;border-radius:8px;font-size:.8rem;font-weight:700;transition:.2s}
-.btn-upgrade:hover{filter:brightness(1.2);transform:scale(1.02)}
-.plat-btn .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.dot-zp{background:#00d4ff}.dot-ml{background:#ffe000}.dot-olx{background:#7c3aed}
-.dot-ap{background:#22c55e}.dot-ic{background:#f97316}
-.btn-search{width:100%;margin-top:20px;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;transition:.2s;letter-spacing:.03em}
-.btn-search:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,212,255,.3)}
-.btn-search:disabled{opacity:.5;cursor:not-allowed;transform:none}
-/* Results panel */
-.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-.stats{display:flex;gap:12px;flex-wrap:wrap}
-.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.8rem}
-.stat-chip span{color:var(--accent);font-weight:700}
-.btn-excel{padding:8px 16px;background:rgba(34,197,94,.15);border:1px solid var(--green);color:var(--green);border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;text-decoration:none;display:none}
-.btn-excel.show{display:inline-flex;align-items:center;gap:6px}
-/* Log */
-.log-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;height:120px;overflow-y:auto;font-family:monospace;font-size:.75rem;color:var(--muted);margin-bottom:16px}
-.log-entry{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.03)}
-.log-entry.ok{color:var(--green)}.log-entry.err{color:#f87171}.log-entry.info{color:var(--accent)}
-/* Table */
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:.82rem}
-thead th{background:var(--surface);padding:10px 14px;text-align:left;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);position:sticky;top:0}
-tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:.15s}
-tbody tr:hover{background:rgba(0,212,255,.04)}
-td{padding:10px 14px;vertical-align:middle}
-.source-badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;white-space:nowrap}
-.score-bar{display:flex;align-items:center;gap:8px}
-.bar{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s}
-.score-num{font-size:.75rem;color:var(--muted);min-width:28px}
-.link-btn{color:var(--accent);text-decoration:none;font-size:.75rem;padding:4px 10px;border:1px solid var(--border);border-radius:6px;white-space:nowrap}
-.link-btn:hover{background:rgba(0,212,255,.08)}
-.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
-.empty-state .icon{font-size:3rem;margin-bottom:12px}
-/* Progress */
-.progress-wrap{margin-bottom:12px;display:none}
-.progress-wrap.show{display:block}
-.progress-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0%;transition:width .5s;animation:shimmer 2s infinite}
-@keyframes shimmer{0%,100%{opacity:1}50%{opacity:.7}}
-/* Intel Panel */
-.intel-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;display:none}
-.intel-panel.show{display:grid;grid-template-columns:1fr 1.5fr;gap:20px}
-.intel-score{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;background:var(--card);border-radius:10px;border:1px solid var(--border)}
-.intel-score .val{font-size:3rem;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
-.intel-score .lbl{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:8px}
-.intel-data{display:flex;flex-direction:column;gap:12px;font-size:.85rem}
-.intel-item{display:flex;gap:8px;align-items:flex-start}
-.intel-item .icon{font-size:1.2rem}
-.intel-item b{color:var(--text)}
-.intel-item span{color:var(--muted)}
-/* Responsive */
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr}
-  .platforms{grid-template-columns:1fr 1fr 1fr}
-  .intel-panel.show{grid-template-columns:1fr}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(0, 242, 255, 0.05) 0%, transparent 50%),
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+/* LIVE TICKER */
+.ticker-wrap {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid var(--accent);
+    padding: 8px 0;
+    overflow: hidden;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+}
+.ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+}
+.ticker-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 40px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent);
+}
+.ticker-item span { color: var(--fire); margin-left: 8px; font-weight: bold; }
+@keyframes ticker {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+/* HEADER */
+.header {
+    padding: 30px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.brand h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    background: linear-gradient(to right, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.brand p { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 4px; }
+
+/* LAYOUT */
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 40px 40px;
+    display: grid;
+    grid-template-columns: 350px 1fr 300px;
+    gap: 25px;
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+}
+
+/* RADAR ANIMATION */
+.radar-container {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+.radar {
+    width: 150px;
+    height: 150px;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    position: relative;
+    background: radial-gradient(circle, rgba(0, 242, 255, 0.1) 0%, transparent 70%);
+}
+.radar::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 150px; height: 150px;
+    background: conic-gradient(from 0deg, var(--accent) 0%, transparent 40%);
+    border-radius: 50%;
+    transform-origin: top left;
+    animation: scan 4s linear infinite;
+    display: none;
+}
+.scanning .radar::after { display: block; }
+@keyframes scan {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* FORM ELEMENTS */
+h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); margin-bottom: 20px; border-left: 3px solid var(--accent); padding-left: 10px; }
+.form-group { margin-bottom: 15px; }
+label { display: block; font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; }
+input, select {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    color: #fff;
+    font-family: 'Outfit', sans-serif;
+    outline: none;
+    transition: 0.3s;
+}
+input:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 20px var(--accent-glow); }
+
+/* MAIN TABLE */
+.table-container { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
+th { text-align: left; padding: 15px; color: var(--text-dim); text-transform: uppercase; font-size: 0.65rem; border-bottom: 1px solid var(--border); }
+td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+tr:hover { background: rgba(0, 242, 255, 0.03); }
+
+.badge { padding: 4px 10px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; }
+.badge-fire { background: var(--fire); color: #fff; }
+.badge-pro { background: var(--gold); color: #000; }
+
+/* STATS CARDS */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+.stat-box { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+.stat-box span { display: block; font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; }
+.stat-box b { font-size: 1.2rem; color: var(--accent); }
+
+/* PRO CARD */
+.pro-card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 25px;
+    text-align: center;
+}
+.pro-card h4 { color: var(--gold); font-size: 1.2rem; margin-bottom: 10px; }
+.pro-card p { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 20px; }
+.btn-gold {
+    display: inline-block;
+    padding: 12px 25px;
+    background: var(--gold);
+    color: #000;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.8rem;
+    transition: 0.3s;
+}
+.btn-gold:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 204, 0, 0.4); }
+
+/* LOG BOX */
+.terminal {
+    background: #000;
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    height: 150px;
+    overflow-y: auto;
+    color: var(--green);
+    border: 1px solid var(--border);
+    margin-top: 20px;
+}
+
+@media (max-width: 1200px) {
+    .container { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
+
+<div class="ticker-wrap">
+    <div class="ticker" id="ticker">
+        <div class="ticker-item">PALERMO: Dueño directo detectado <span>-15% MARKET</span></div>
+        <div class="ticker-item">RECOLETA: Oportunidad de pozo <span>NUEVO</span></div>
+        <div class="ticker-item">BELGRANO: Baja de precio masiva <span>HOT</span></div>
+        <div class="ticker-item">LUJAN: Terreno comercial <span>WHALE ALERT</span></div>
+        <div class="ticker-item">PALERMO: Dueño directo detectado <span>-15% MARKET</span></div>
+        <div class="ticker-item">RECOLETA: Oportunidad de pozo <span>NUEVO</span></div>
+        <div class="ticker-item">BELGRANO: Baja de precio masiva <span>HOT</span></div>
+        <div class="ticker-item">LUJAN: Terreno comercial <span>WHALE ALERT</span></div>
+    </div>
+</div>
+
 <div class="header">
-  <div class="pulse"></div>
-  <div>
-    <h1>🏠 Comparador Inmobiliario AR</h1>
-    <div class="subtitle">ZonaProp · MercadoLibre · OLX · Argenprop · Infocasas</div>
-  </div>
+    <div class="brand">
+        <h1>RADAR INMOBILIARIO</h1>
+        <p>Information Arbitrage Engine</p>
+    </div>
+    <div style="display:flex; gap: 20px;">
+        <div class="stat-box" style="padding: 5px 20px;"><span>Server Status</span><b style="color:var(--green); font-size: 0.8rem;">● OPERATIONAL</b></div>
+    </div>
 </div>
 
 <div class="container">
-  <div class="grid">
-    <div class="panel">
-      <h2>🎯 Parámetros de Búsqueda</h2>
+    <!-- LEFT PANEL: CONTROLS -->
+    <div class="sidebar">
+        <div class="card" style="margin-bottom: 25px;">
+            <div class="radar-container" id="radarBox">
+                <div class="radar"></div>
+            </div>
+            <h3>Parámetros</h3>
+            <div class="form-group">
+                <label>Ubicación Target</label>
+                <input type="text" id="zona" placeholder="Ej: Palermo Soho" value="Palermo">
+            </div>
+            <div class="form-group">
+                <label>Tipo de Unidad</label>
+                <select id="tipo">
+                    <option value="departamentos">Departamentos</option>
+                    <option value="casas">Casas</option>
+                    <option value="ph">PH</option>
+                    <option value="terrenos">Terrenos</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Operación</label>
+                <select id="operacion">
+                    <option value="venta">Venta</option>
+                    <option value="alquiler">Alquiler</option>
+                </select>
+            </div>
+            <button class="btn-primary" id="btnSearch" onclick="iniciarBusqueda()">Iniciar Escaneo</button>
+        </div>
 
-      <label>Zona / Barrio</label>
-      <input id="zona" type="text" placeholder="ej: palermo, lujan, belgrano" value="palermo">
-
-      <label>Operación</label>
-      <select id="operacion">
-        <option value="venta">Venta</option>
-        <option value="alquiler">Alquiler</option>
-      </select>
-
-      <label>Tipo de Propiedad</label>
-      <select id="tipo">
-        <option value="departamentos">Departamentos</option>
-        <option value="casas">Casas</option>
-        <option value="ph">PH</option>
-        <option value="locales">Locales Comerciales</option>
-        <option value="terrenos">Terrenos</option>
-      </select>
-
-      <label>Páginas por Plataforma</label>
-      <select id="max_paginas">
-        <option value="1">1 página (~20 resultados)</option>
-        <option value="2" selected>2 páginas (~40 resultados)</option>
-        <option value="3">3 páginas (~60 resultados)</option>
-      </select>
-
-      <label>Plataformas</label>
-      <div class="platforms" id="platforms">
-        <div class="plat-btn active" data-id="zonaprop"><span class="dot dot-zp"></span>ZonaProp</div>
-        <div class="plat-btn active" data-id="mercadolibre"><span class="dot dot-ml"></span>MercadoLibre</div>
-        <div class="plat-btn active" data-id="argenprop"><span class="dot dot-ap"></span>Argenprop</div>
-        <div class="plat-btn active" data-id="remax"><span class="dot dot-ic"></span>Remax</div>
-      </div>
-
-      <button class="btn-search" id="btnSearch" onclick="iniciarBusqueda()">
-        🔍 Iniciar Búsqueda Comparativa
-      </button>
-
-      <div class="membership-card" style="margin-top:20px">
-        <h3>🚀 Plan Radar Pro</h3>
-        <p style="font-size:.8rem;color:var(--muted);margin:8px 0">Destrabá links directos a dueños urgentes, descarga Excel completo y alertas 24/7.</p>
-        <button class="btn-upgrade" onclick="iniciarPago()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#00d4ff);color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:.9rem">
-          💳 Comprar Acceso Pro — $5.000 ARS
-        </button>
-        <p id="pagoStatus" style="font-size:.75rem;color:var(--muted);margin-top:8px;display:none">Redirigiendo a MercadoPago...</p>
-      </div>
+        <div class="pro-card">
+            <h4>ACCESO ALPHA</h4>
+            <p>Obtén el número de teléfono del dueño directo antes que nadie.</p>
+            <a href="javascript:void(0)" onclick="iniciarPago()" class="btn-gold">DESTRABAR $5.000</a>
+            <p id="pagoStatus" style="margin-top:10px; font-size: 0.6rem; display:none;">Generando link...</p>
+        </div>
     </div>
 
-
-    <div class="panel">
-      <div class="results-header">
-        <h2>📊 Resultados</h2>
-        <div style="display:flex;gap:10px;align-items:center">
-          <div class="stats" id="stats"></div>
-          <a class="btn-excel" id="btnCsv" href="#" download style="background:rgba(124,58,237,.15);border-color:var(--accent2);color:var(--accent2)">⬇ CSV (IA)</a>
-          <a class="btn-excel" id="btnExcel" href="#" download>⬇ Excel</a>
+    <!-- CENTER PANEL: DATA -->
+    <div class="main-content">
+        <div class="stat-grid">
+            <div class="stat-box"><span>Oportunidades</span><b id="totalCount">0</b></div>
+            <div class="stat-box"><span>Zona Score</span><b id="zonaScore">--</b></div>
         </div>
-      </div>
 
-      <div class="progress-wrap" id="progressWrap">
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-      </div>
-
-      <div class="intel-panel" id="intelPanel">
-        <div class="intel-score">
-          <div class="val" id="intelScoreVal">-</div>
-          <div class="lbl" id="intelScoreLbl">Analizando Zona</div>
+        <div class="card" style="min-height: 600px;">
+            <h3>Resultados del Escaneo</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fuente</th>
+                            <th>Precio</th>
+                            <th>Ubicación</th>
+                            <th>Inteligencia</th>
+                            <th>Urgencia</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsBody">
+                        <tr>
+                            <td colspan="6" style="text-align:center; padding: 100px; color: var(--text-dim);">
+                                Ingrese ubicación para iniciar el arbitraje de datos...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="intel-data">
-          <div class="intel-item">
-            <div class="icon">📈</div>
-            <div><b>Demanda Digital:</b> <span id="intelTrends">-</span></div>
-          </div>
-          <div class="intel-item">
-            <div class="icon">🎭</div>
-            <div><b>Vida de Zona:</b> <span id="intelEvents">-</span></div>
-          <div class="intel-item">
-            <div class="icon">💰</div>
-            <div><b>Mercado (m²):</b> <span id="intelEco">-</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="log-box" id="logBox"></div>
-
-      <div class="table-wrap">
-        <table id="resultsTable">
-          <thead>
-            <tr>
-              <th>Fuente</th>
-              <th>Precio</th>
-              <th>Zona</th>
-              <th>Descripción</th>
-              <th>Urgencia</th>
-              <th>Link</th>
-            </tr>
-          </thead>
-          <tbody id="resultsBody">
-            <tr>
-              <td colspan="6">
-                <div class="empty-state">
-                  <div class="icon">🔍</div>
-                  <div>Configurá los parámetros y lanzá la búsqueda</div>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
     </div>
-  </div>
+
+    <!-- RIGHT PANEL: IA ANALYSIS -->
+    <div class="right-sidebar">
+        <div class="card">
+            <h3>Deep Intelligence</h3>
+            <div id="intelData" style="font-size: 0.75rem; line-height: 1.6; color: var(--text-dim);">
+                <p>Esperando datos para análisis de IA...</p>
+            </div>
+            
+            <div class="terminal" id="logBox">
+                > Sistema inicializado...<br>
+                > Esperando instrucciones...
+            </div>
+        </div>
+        
+        <div class="card" style="margin-top: 25px; border-color: var(--fire);">
+            <h3 style="color: var(--fire);">OPORTUNIDADES FUEGO</h3>
+            <div id="fireList" style="font-size: 0.7rem;">
+                <p style="color: var(--text-dim);">Solo para miembros Pro</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-const SOURCE_COLORS = {
-  ZonaProp: '#00d4ff', MercadoLibre: '#ffe000',
-  OLX: '#7c3aed', Argenprop: '#22c55e', Infocasas: '#f97316'
-};
 let currentJobId = null;
-let eventSource = null;
 let allResults = [];
 
-// Toggle plataformas
-document.querySelectorAll('.plat-btn').forEach(btn => {
-  btn.addEventListener('click', () => btn.classList.toggle('active'));
-});
-
-function getActivePlatforms() {
-  return [...document.querySelectorAll('.plat-btn.active')].map(b => b.dataset.id);
-}
-
-function log(msg, type='info') {
-  const box = document.getElementById('logBox');
-  const div = document.createElement('div');
-  div.className = `log-entry ${type}`;
-  div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
-  box.appendChild(div);
-  box.scrollTop = box.scrollHeight;
-}
-
-function updateStats() {
-  const counts = {};
-  allResults.forEach(r => { counts[r.fuente] = (counts[r.fuente] || 0) + 1; });
-  const stats = document.getElementById('stats');
-  stats.innerHTML = `<div class="stat-chip">Total: <span>${allResults.length}</span></div>` +
-    Object.entries(counts).map(([k,v]) =>
-      `<div class="stat-chip" style="border-color:${SOURCE_COLORS[k]}40;color:${SOURCE_COLORS[k]}">${k}: <span>${v}</span></div>`
-    ).join('');
+function log(msg, color='var(--green)') {
+    const box = document.getElementById('logBox');
+    const line = document.createElement('div');
+    line.style.color = color;
+    line.innerHTML = `> ${msg}`;
+    box.appendChild(line);
+    box.scrollTop = box.scrollHeight;
 }
 
 function renderRow(r) {
-  const color = SOURCE_COLORS[r.fuente] || '#fff';
-  const score = r.score_urgencia || 0;
-  return `<tr>
-    <td><span class="source-badge" style="background:${color}22;color:${color};border:1px solid ${color}44">${r.fuente}</span></td>
-    <td style="font-weight:600;color:var(--accent)">${r.precio || 'Consultar'}</td>
-    <td>${r.zona || ''}</td>
-    <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.descripcion||'').replace(/"/g,'')}">${r.descripcion || ''}</td>
-    <td><div class="score-bar"><div class="bar" style="width:${score}px;max-width:80px"></div><span class="score-num">${score}</span></div></td>
-    <td><a class="link-btn" style="background:var(--accent2);color:#fff;border:none" href="javascript:void(0)" onclick="alert('Debes ser Plan Pro para ver este link directo')">🔒 Destrabar Link</a></td>
-  </tr>`;
+    const score = r.score_urgencia || 0;
+    const isFire = score > 60;
+    return `
+        <tr>
+            <td><b style="color:var(--accent)">${r.fuente}</b></td>
+            <td><span style="color:var(--accent); font-weight: bold;">${r.precio}</span></td>
+            <td>${r.zona}</td>
+            <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${r.descripcion}</td>
+            <td>
+                <div style="width: 60px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
+                    <div style="width: ${score}%; height: 100%; background: ${isFire ? 'var(--fire)' : 'var(--accent)'}; border-radius: 3px; box-shadow: 0 0 10px ${isFire ? 'rgba(255,77,0,0.5)' : 'rgba(0,242,255,0.5)'}"></div>
+                </div>
+            </td>
+            <td><a href="javascript:void(0)" class="badge ${isFire ? 'badge-fire' : 'badge-pro'}" onclick="alert('Acceso restringido: Mejore a Plan Pro')">VER CONTACTO</a></td>
+        </tr>
+    `;
 }
 
 async function iniciarBusqueda() {
-  const plataformas = getActivePlatforms();
-  if (!plataformas.length) { alert('Seleccioná al menos una plataforma'); return; }
-
-  const btn = document.getElementById('btnSearch');
+    const btn = document.getElementById('btnSearch');
+  const zonaInput = document.getElementById('zona');
+  const radar = document.getElementById('radarBox');
   btn.disabled = true;
   btn.textContent = '⏳ Buscando...';
+  
   document.getElementById('logBox').innerHTML = '';
-  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">Iniciando scrapers...</td></tr>';
-  document.getElementById('progressWrap').classList.add('show');
-  document.getElementById('btnExcel').classList.remove('show');
-  document.getElementById('btnCsv').classList.remove('show');
-  document.getElementById('stats').innerHTML = '';
-  allResults = [];
-
-  if (eventSource) { eventSource.close(); eventSource = null; }
-
-  const body = {
-    plataformas,
-    zona: document.getElementById('zona').value.trim() || 'palermo',
-    operacion: document.getElementById('operacion').value,
-    tipo: document.getElementById('tipo').value,
-    max_paginas: document.getElementById('max_paginas').value,
-  };
-
-  let res;
-  try {
-    res = await fetch('/api/buscar', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
-    const data = await res.json();
-    currentJobId = data.job_id;
-    log(`Job iniciado: ${currentJobId} — ${plataformas.join(', ')}`, 'info');
-  } catch(e) {
-    log('Error al conectar con el servidor', 'err');
-    btn.disabled = false; btn.textContent = '🔍 Iniciar Búsqueda Comparativa';
-    return;
-  }
-
-  // Conectar SSE
-  eventSource = new EventSource(`/api/stream/${currentJobId}`);
-  eventSource.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    if (data.type === 'log') {
-      const isErr = data.msg.includes('ERROR');
-      const isOk = data.msg.includes('OK');
-      log(data.msg, isErr ? 'err' : isOk ? 'ok' : 'info');
-    } else if (data.type === 'results') {
-      allResults.push(...data.items);
-      allResults.sort((a,b) => (b.score_urgencia||0) - (a.score_urgencia||0));
-      document.getElementById('resultsBody').innerHTML = allResults.map(renderRow).join('');
-      updateStats();
-    } else if (data.type === 'done') {
-      log(`Completado — ${data.total} resultados encontrados`, 'ok');
-      document.getElementById('progressFill').style.width = '100%';
-      btn.disabled = false; btn.textContent = '🔍 Iniciar Búsqueda Comparativa';
-      eventSource.close();
-      
-      // Mostrar Inteligencia
-      if (data.intel) {
-        document.getElementById('intelPanel').classList.add('show');
-        document.getElementById('intelScoreVal').textContent = data.intel.zona_score;
-        document.getElementById('intelScoreLbl').textContent = data.intel.zona_score_label;
-        document.getElementById('intelTrends').textContent = data.intel.capas.trends.interpretacion || 'Sin datos de Google Trends';
-        document.getElementById('intelEvents').textContent = data.intel.capas.eventos.interpretacion || 'Sin datos de eventos';
-        document.getElementById('intelEco').textContent = data.intel.capas.economia.interpretacion || 'Sin datos de mercado';
-      }
-
-      if (data.excel) {
-        const exBtn = document.getElementById('btnExcel');
-        exBtn.href = `/api/descargar/${currentJobId}`;
-        exBtn.classList.add('show');
-      }
-      if (data.csv) {
-        const csvBtn = document.getElementById('btnCsv');
-        csvBtn.href = `/api/descargar_csv/${currentJobId}`;
-        csvBtn.classList.add('show');
-      }
-      if (!allResults.length) {
-        document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6"><div class="empty-state"><div class="icon">😶</div><div>Sin resultados — probá con otra zona o plataforma</div></div></td></tr>';
-      }
+  document.getElementById('resultsBody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-dim);padding:40px">Iniciando scrapers...</td></tr>';
+    radar.classList.add('scanning');
+    
+    log(`Iniciando escaneo profundo en ${zonaInput.value.toUpperCase()}...`);
+    
+    try {
+        const res = await fetch('/api/buscar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                zona: zona,
+                operacion: document.getElementById('operacion').value,
+                tipo: document.getElementById('tipo').value,
+                max_paginas: 1,
+                plataformas: ['zonaprop', 'mercadolibre', 'argenprop']
+            })
+        });
+        const data = await res.json();
+        currentJobId = data.job_id;
+        
+        // Simular SSE o Polling para este ejemplo rápido
+        pollStatus(currentJobId);
+        
+    } catch(e) {
+        log("Error en la conexión", "var(--fire)");
+        btn.disabled = false;
+        radar.classList.remove('scanning');
     }
-  };
-  eventSource.onerror = function() {
-    log('Conexión SSE interrumpida', 'err');
-    btn.disabled = false; btn.textContent = '🔍 Iniciar Búsqueda Comparativa';
-  };
 }
+
+async function pollStatus(jobId) {
+    const timer = setInterval(async () => {
+        const res = await fetch(`/api/status/${jobId}`);
+        const data = await res.json();
+        
+        if (data.resultados) {
+            allResults = data.resultados;
+            document.getElementById('totalCount').textContent = allResults.length;
+            document.getElementById('resultsBody').innerHTML = allResults.map(renderRow).join('');
+        }
+        
+        if (data.status === 'done') {
+            clearInterval(timer);
+            document.getElementById('btnSearch').disabled = false;
+            document.getElementById('btnSearch').textContent = "Iniciar Escaneo";
+            document.getElementById('radarBox').classList.remove('scanning');
+            log(`Escaneo completado. ${allResults.length} entidades detectadas.`);
+            
+            if (data.intel) {
+                document.getElementById('zonaScore').textContent = data.intel.zona_score;
+                const intelBox = document.getElementById('intelData');
+                intelBox.innerHTML = `
+                    <div style="margin-bottom:10px;"><b>TENDENCIA:</b> ${data.intel.capas.trends.interpretacion}</div>
+                    <div style="margin-bottom:10px;"><b>MERCADO:</b> ${data.intel.capas.economia.interpretacion}</div>
+                    <div><b>EVENTOS:</b> ${data.intel.capas.eventos.interpretacion}</div>
+                `;
+            }
+        }
+    }, 2000);
+}
+
 async function iniciarPago() {
-  const zona = document.getElementById('zona').value.trim() || 'general';
-  const statusEl = document.getElementById('pagoStatus');
-  statusEl.style.display = 'block';
-  statusEl.textContent = '⏳ Generando link de pago...';
-  try {
-    const res = await fetch('/api/generar_pago', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ email: 'cliente@radar.com', zona: zona, plan: 'full' })
-    });
-    const data = await res.json();
-    if (data.init_point) {
-      statusEl.textContent = '✅ Redirigiendo a MercadoPago...';
-      window.open(data.init_point, '_blank');
-    } else {
-      statusEl.textContent = '❌ Error: ' + (data.error || 'No se pudo generar el pago');
+    const statusEl = document.getElementById('pagoStatus');
+    statusEl.style.display = 'block';
+    try {
+        const res = await fetch('/api/generar_pago', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ email: 'user@radar.com', zona: 'all', plan: 'pro' })
+        });
+        const data = await res.json();
+        if (data.init_point) window.open(data.init_point, '_blank');
+    } catch(e) {
+        log("Error al generar pago", "var(--fire)");
     }
-  } catch(e) {
-    statusEl.textContent = '❌ Error de conexión con el servidor';
-  }
 }
 </script>
-
 </body>
 </html>

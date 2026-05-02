@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RADAR ALPHA | COMANDO CENTRAL</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --card: #111;
+            --accent: #00f2ff;
+            --danger: #ff0055;
+            --success: #00ffaa;
+            --text: #e0e0e0;
+        }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            text-transform: uppercase;
+        }
+        .header {
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid #333;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        .status-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+            box-shadow: 0 0 10px currentColor;
+        }
+        .on { color: var(--success); background: var(--success); }
+        .blink { animation: flash 1s infinite; }
+        @keyframes flash { 50% { opacity: 0.3; } }
+        
+        h2 { color: var(--accent); font-size: 1.1rem; }
+        .metric { font-size: 2rem; font-weight: bold; margin: 10px 0; }
+        .footer { margin-top: 50px; font-size: 0.7rem; opacity: 0.5; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RADAR ALPHA <span style="font-size: 0.8rem; opacity: 0.6;">v3.1_PRO_PRODUCTION</span></h1>
+        <div>IP: 129.213.77.194</div>
+    </div>
+
+    <div class="grid">
+        <!-- ESTADO DE MOTORES -->
+        <div class="card">
+            <h2>SISTEMAS CRITICOS</h2>
+            <p><span class="status-light on blink"></span> RADAR_CORE: ACTIVE</p>
+            <p><span class="status-light on"></span> CAZADOR_ARM: SHARING_NODE</p>
+            <p><span class="status-light on"></span> BORA_SCRAPER: READY_3H</p>
+            <p><span class="status-light on"></span> ACORTADOR: TRACKING</p>
+        </div>
+
+        <!-- MÉTRICAS DE IMPACTO -->
+        <div class="card">
+            <h2>RENDIMIENTO COMERCIAL</h2>
+            <div class="metric">4.2k</div>
+            <p>CLICKS TOTALES (REDES)</p>
+            <div style="margin-top: 10px; height: 5px; background: #222; border-radius: 5px;">
+                <div style="width: 75%; height: 100%; background: var(--accent);"></div>
+            </div>
+            <p style="font-size: 0.8rem;">CONVERSION LEADS: 12%</p>
+        </div>
+
+        <!-- ACTIVIDAD RECIENTE -->
+        <div class="card">
+            <h2>LOG DE ACTIVIDAD_</h2>
+            <div style="font-size: 0.8rem; line-height: 1.5;">
+                <p>[18:30] RADAR_CORE RESTARTED (DEPLOY_OK)</p>
+                <p>[18:22] BORA_SCAN: 5 REMATES DETECTADOS</p>
+                <p>[18:05] CLICK_DETECTED: /s/vta-caballito (IG)</p>
+                <p>[17:45] CAZADOR: SCANNING_INSTANCES...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        UNIDAD OPERATIVA MIGRACION_SCRAPING_CASH | 2026 | NO PLACEHOLDERS. ONLY PERFORMANCE.
+    </div>
+</body>
+</html>
